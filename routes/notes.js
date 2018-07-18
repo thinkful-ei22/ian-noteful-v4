@@ -10,6 +10,36 @@ const passport = require('passport');
 
 router.use('/', passport.authenticate('jwt', {session: false, failWithError: true }));
 
+//validate folderID
+function validateFolderId(folderId, userId) {
+  if(folderId === undefined) {
+    return Promise.resolve();
+  }
+  return Folder.findOne({ _id: folderId, userId })
+    .then(result => {
+      if(!result) {
+        const err = new Error('the folder id is not valid');
+        err.status = 400;
+        return Promise.reject(err);
+      }
+    });
+  }
+
+//validate tag IDs
+function validateTagIds(tags = [], userId) {
+  if(!tags.length) {
+    return Promise.resolve();
+  }
+  return Tag.find({ $and : [{ _id: { $in: tags }, userId }] })
+    .then(results => {
+      if(tags.length !== results.length) {
+        const err = new Error('the tags array contains an invalid id');
+        err.status = 400;
+        return Promise.reject(err);
+      }
+  });
+}
+
 /* ========== GET/READ ALL ITEMS ========== */
 router.get('/', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
@@ -96,7 +126,11 @@ router.post('/', (req, res, next) => {
 
   const newNote = { title, content, folderId, tags, userId };
 
-  Note.create(newNote)
+  Promise.all([
+    validateFolderId(folderId, userId),
+    validateTagIds(tags, userId)
+  ])
+    .then(() => Note.create(newNote))
     .then(result => {
       res
         .location(`${req.originalUrl}/${result.id}`)
@@ -148,9 +182,17 @@ router.put('/:id', (req, res, next) => {
     return next(err);
   }
 
-  const updateNote = { title, content, folderId, tags };
+  const updateNote = { title, content, tags };
 
-  Note.findByIdAndUpdate(id, updateNote, { new: true })
+  if(mongoose.Types.ObjectId.isValid(folderId)){
+    update.folderId = folderId;
+  }
+
+  Promise.all([
+    validateFolderId(folderId, userId),
+    validateTagIds(tags, userId)
+  ])
+    .then(() => Note.findByIdAndUpdate(id, updateNote, { new: true }).populate('tags'))
     .then(result => {
       if (result) {
         res.json(result);
