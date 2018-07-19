@@ -95,12 +95,6 @@ router.put('/:id', (req, res, next) => {
     return next(err);
   }
 
-  if (userId !== realUserId) {
-    const err = new Error('cannot update tag that isnt yours');
-    err.status = 400;
-    return next(err);
-  }
-
   const updateTag = { name };
 
   Tag.findByIdAndUpdate(id, updateTag, { new: true })
@@ -129,12 +123,6 @@ router.delete('/:id', (req, res, next) => {
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
-    err.status = 400;
-    return next(err);
-  }
-
-  if (userId !== realUserId) {
-    const err = new Error('cannot delete tag that isnt yours');
     err.status = 400;
     return next(err);
   }

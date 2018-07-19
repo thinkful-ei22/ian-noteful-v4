@@ -20,7 +20,7 @@ const expect = chai.expect;
 let token;
 let user;
 
-describe.only('Noteful API - Folders', function () {
+describe('Noteful API - Folders', function () {
 
   before(function () {
     return mongoose.connect(TEST_MONGODB_URI)
