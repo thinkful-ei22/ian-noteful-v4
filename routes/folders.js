@@ -79,7 +79,7 @@ router.post('/', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
   const { id } = req.params;
-  const { name, userId } = req.body;
+  const { name } = req.body;
   const realUserId = req.user.id;
 
   /***** Never trust users - validate input *****/
@@ -91,12 +91,6 @@ router.put('/:id', (req, res, next) => {
 
   if (!name) {
     const err = new Error('Missing `name` in request body');
-    err.status = 400;
-    return next(err);
-  }
-
-  if (userId !== realUserId) {
-    const err = new Error('cannot update folder that isnt yours');
     err.status = 400;
     return next(err);
   }
@@ -129,12 +123,6 @@ router.delete('/:id', (req, res, next) => {
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
-    err.status = 400;
-    return next(err);
-  }
-
-  if (userId !== realUserId) {
-    const err = new Error('cannot delete folder that isnt yours');
     err.status = 400;
     return next(err);
   }
