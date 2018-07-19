@@ -146,7 +146,6 @@ router.post('/', (req, res, next) => {
 router.put('/:id', (req, res, next) => {
   const { id } = req.params;
   const { title, content, folderId, tags = [], userId } = req.body;
-  const realUserId = req.user.id;
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -176,12 +175,6 @@ router.put('/:id', (req, res, next) => {
     }
   }
 
-  if (userId !== realUserId) {
-    const err = new Error('cannot update note that isnt yours');
-    err.status = 400;
-    return next(err);
-  }
-
   const updateNote = { title, content, tags };
 
   if(mongoose.Types.ObjectId.isValid(folderId)){
@@ -208,18 +201,10 @@ router.put('/:id', (req, res, next) => {
 /* ========== DELETE/REMOVE A SINGLE ITEM ========== */
 router.delete('/:id', (req, res, next) => {
   const { id } = req.params;
-  const { userId } = req.body;
-  const realUserId = req.user.id;
 
   /***** Never trust users - validate input *****/
   if (!mongoose.Types.ObjectId.isValid(id)) {
     const err = new Error('The `id` is not valid');
-    err.status = 400;
-    return next(err);
-  }
-
-  if (userId !== realUserId) {
-    const err = new Error('cannot delete note that isnt yours');
     err.status = 400;
     return next(err);
   }

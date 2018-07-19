@@ -20,7 +20,7 @@ const expect = chai.expect;
 let token;
 let user;
 
-describe.only('Noteful API - Tags', function () {
+describe('Noteful API - Tags', function () {
 
   before(function () {
     return mongoose.connect(TEST_MONGODB_URI)
