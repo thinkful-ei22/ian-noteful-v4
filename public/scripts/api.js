@@ -1,4 +1,4 @@
-/* global $ */
+/* global $ store */
 'use strict';
 
 const api = (function () {
