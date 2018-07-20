@@ -378,6 +378,7 @@ describe('Noteful API - Notes', function () {
 
     it('should return an error when `folderId` is not valid ', function () {
       const updateItem = {
+        title: 'hey there idiot',
         folderId: 'NOT-A-VALID-ID'
       };
       return Note.findOne({ userId: user.id })

@@ -150,7 +150,7 @@ router.post('/', (req, res, next) => {
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
   const { id } = req.params;
-  const { title, content, folderId, tags = [] } = req.body;
+  let { title, content, folderId, tags = [] } = req.body;
   const userId = req.user.id;
 
   /***** Never trust users - validate input *****/
@@ -170,11 +170,11 @@ router.put('/:id', (req, res, next) => {
     updateNote.folderId = folderId;
   }
   if(folderId === '') {
-    delete updateNote.folderId;
+    folderId = undefined;
   }
 
   Promise.all([
-    validateFolderId(updateNote.folderId, userId),
+    validateFolderId(folderId, userId),
     validateTagIds(tags, userId)
   ])
     .then(() => Note.findByIdAndUpdate(id, updateNote, { new: true }).populate('tags'))
