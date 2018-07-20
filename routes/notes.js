@@ -4,6 +4,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const Note = require('../models/note');
+const Folder = require('../models/folder');
+const Tag = require('../models/tag');
 
 const router = express.Router();
 const passport = require('passport');
@@ -101,6 +103,8 @@ router.post('/', (req, res, next) => {
   const { title, content, folderId, tags = [] } = req.body;
   const userId = req.user.id
 
+  const newNote = { title, content, folderId, tags, userId };
+
   /***** Never trust users - validate input *****/
   if (!title) {
     const err = new Error('Missing `title` in request body');
@@ -108,10 +112,14 @@ router.post('/', (req, res, next) => {
     return next(err);
   }
 
-  if (folderId && !mongoose.Types.ObjectId.isValid(folderId)) {
+  if ((folderId || folderId !== undefined) && !mongoose.Types.ObjectId.isValid(folderId)) {
     const err = new Error('The `folderId` is not valid');
     err.status = 400;
     return next(err);
+  }
+
+  if(folderId === '') {
+    delete newNote.folderId;
   }
 
   if (tags) {
@@ -124,7 +132,7 @@ router.post('/', (req, res, next) => {
     });
   }
 
-  const newNote = { title, content, folderId, tags, userId };
+  
 
   Promise.all([
     validateFolderId(folderId, userId),
