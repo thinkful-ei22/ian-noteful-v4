@@ -169,9 +169,12 @@ router.put('/:id', (req, res, next) => {
   if(mongoose.Types.ObjectId.isValid(folderId)){
     updateNote.folderId = folderId;
   }
+  if(folderId === '') {
+    delete updateNote.folderId;
+  }
 
   Promise.all([
-    validateFolderId(folderId, userId),
+    validateFolderId(updateNote.folderId, userId),
     validateTagIds(tags, userId)
   ])
     .then(() => Note.findByIdAndUpdate(id, updateNote, { new: true }).populate('tags'))
